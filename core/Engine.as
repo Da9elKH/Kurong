@@ -37,10 +37,10 @@ package core {
 		public function Engine(board:MovieClip, gameCount:int):void { // Contructor-funksjon for Engine-klassen.
 			gameTimer.addEventListener(TimerEvent.TIMER, update);
 			rotateTimer.addEventListener(TimerEvent.TIMER, rotateTick);
-			holesArray.push(board.h0);
 			holesArray.push(board.h1);
 			holesArray.push(board.h2);
 			holesArray.push(board.h3);
+			holesArray.push(board.h4);
 			gameBoard = board;
 			numGames = gameCount;
 			newGame();
@@ -48,10 +48,8 @@ package core {
 		
 		public function newGame():void { // Resetter brettet til en ny start.
 			gameTimer.start();
-			// Rensker alle brikkene på brettet fra forrige runde
-			for each(var piece in piecesArray) {
-				gameBoard.removeChild(piece);
-			} piecesArray = new Array();
+			clearChildren();
+			piecesArray = new Array();
 			// Fjerner alle brikkene som har blitt slått ned fra forrige runde
 			deadPiecesArray = new Array();
 			
@@ -95,8 +93,9 @@ package core {
 			}
 		}
 		
-		public function strikeFinished():void {
-			
+		public function strikeFinished():void { // Kjører når alle brikkene har stoppet etter et slag.
+			// Striker ned = 1 brikke av spillers farge opp
+			// Queen ned = 1 brikke av spillers farge opp
 		}
 		
 		public function update(e:TimerEvent=void):void{ // Oppdateringsfunksjon
@@ -105,7 +104,7 @@ package core {
 			}else if (piecesHaveStopped() && strikerIsHit) { // Dersom brikkene ikke beveger seg og et slag har blitt registrert
 				// Her skal det sjekkes for neste runde
 				strikerIsHit = false;
-				trace("Alle brikker har stoppet!");
+				strikeFinished();
 			}
 			
 			for (var i = 0; i < piecesArray.length; i++ ) {
@@ -120,7 +119,7 @@ package core {
 			}
 		}
 		
-		public function rotateTick(e:TimerEvent):void {
+		public function rotateTick(e:TimerEvent):void { // Roterer brettet
 			const boardLength:int = 600;
 			gameBoard.rotation += 1;
 			if(Math.abs(gameBoard.rotation % 180) > 45 && Math.abs(gameBoard.rotation % 180) < 135){
@@ -212,6 +211,8 @@ package core {
 				}
 			}
 			if (pieceOverlaps) {
+				piece.vX = 0;
+				piece.vY = 0;
 				gameBoard.removeChild(piece);
 				piecesArray.splice(piecesArray.indexOf(piece), 1);
 				currentDeadPiecesArray.push(piece);
