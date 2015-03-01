@@ -33,7 +33,7 @@ package core {
 		private var players:Array = new Array(); // Kopler spiller og brikker sammen.
 		private var numGames:int = 1; // Antall spill som skal spilles.
 		
-		private var strikerIsHit:Boolean; // Lagrer hvorvidt runden har blitt startet ved å skyte striker.
+		public var strikerIsHit:Boolean; // Lagrer hvorvidt runden har blitt startet ved å skyte striker.
 		private var gameBoard:MovieClip; // Lagrer brettet
 		public var striker:Striker; //} Lagrer Striker
 		
@@ -46,6 +46,13 @@ package core {
 			ScoreText2 = newValue;
 			ScoreText2.text = String(scores[1]) + " p";
 		}
+		
+		public function set Scores(newValue:TextField):void {
+			scores = newValue;
+			ScoreText1.text = ScoreText1.text = String(scores[0]) + " p";
+			ScoreText2.text = ScoreText2.text = String(scores[1]) + " p";
+		}
+
 		
 		public function Engine(board:MovieClip, gameCount:int):void { // Contructor-funksjon for Engine-klassen.
 			gameTimer.addEventListener(TimerEvent.TIMER, update);
@@ -109,7 +116,7 @@ package core {
 		public function strikeFinished():void { // Kjører når alle brikkene har stoppet etter et slag.
 			// Striker ned = 1 brikke av spillers farge opp
 			// Queen ned = 1 brikke av spillers farge opp
-			
+			//if(getPiece("Striker", currentDeadPiecesArray))
 		}
 		
 		public function update(e:TimerEvent=void):void{ // Oppdateringsfunksjon
@@ -258,5 +265,15 @@ package core {
 				piece.vY = 0;
 			}
 		}
+		
+		public function getPiece(type:String, array:Array):Piece {
+			var piece:Piece;
+			for each(var p:Piece in array) {
+				if (p.Type == type) piece = p;
+			}
+			return piece;
+		}
+		
+		
 	}
 }
