@@ -47,7 +47,7 @@ package core {
 			ScoreText2.text = String(scores[1]) + " p";
 		}
 		
-		public function set Scores(newValue:TextField):void {
+		public function set Scores(newValue:Array):void {
 			scores = newValue;
 			ScoreText1.text = ScoreText1.text = String(scores[0]) + " p";
 			ScoreText2.text = ScoreText2.text = String(scores[1]) + " p";
