@@ -1,4 +1,4 @@
-package core {
+﻿package core {
 	//{ IMPORTS
 	import core.Piece;
 	import core.pieces.WhiteMan;
@@ -48,9 +48,8 @@ package core {
 		
 		public function newGame():void { // Resetter brettet til en ny start.
 			gameTimer.start();
-			clearChildren();
+			clearChildren(); // Fjerner alle brikkene som har blitt slått ned fra forrige runde
 			piecesArray = new Array();
-			// Fjerner alle brikkene som har blitt slått ned fra forrige runde
 			deadPiecesArray = new Array();
 			
 		//////////////////// PLASSERING AV BRIKKER ///////////////////
@@ -86,7 +85,7 @@ package core {
 			}
 		}
 		
-		public function clearAll():void { // Rensker brettet før et eventuelt nytt turneringssett begynner
+		public function clearChildren():void { // Rensker brettet før et eventuelt nytt turneringssett begynner
 			// Rensker alle brikkene på brettet
 			for each(var piece in piecesArray) {
 				gameBoard.removeChild(piece);
