@@ -1,4 +1,4 @@
-﻿package core {
+package core {
 	//{ IMPORTS
 	import core.Piece;
 	import core.pieces.WhiteMan;
@@ -26,7 +26,8 @@
 		private var deadPiecesArray:Array; // Lagrer alle brikker som har blitt slått ut av spillet
 		private var currentDeadPiecesArray:Array = new Array; // Lagrer brikker som har blitt slått ned i dette slaget.
 		private var holesArray:Array = new Array(); // Lagrer hullene på brettet
-		private var scores:Array = [0, 0]; // Lagrer poengene til hver spiller
+		public var scores:Array = [0, 0]; // Lagrer poengene til hver spiller
+		private var players:Array = new Array(); // Kopler spiller og brikker sammen.
 		private var numGames:int = 1;
 		
 		private var strikerIsHit:Boolean; // Lagrer hvorvidt runden har blitt startet ved å skyte striker.
@@ -47,6 +48,7 @@
 		}
 		
 		public function newGame():void { // Resetter brettet til en ny start.
+			players = new Array();
 			gameTimer.start();
 			clearChildren(); // Fjerner alle brikkene som har blitt slått ned fra forrige runde
 			piecesArray = new Array();
@@ -95,6 +97,7 @@
 		public function strikeFinished():void { // Kjører når alle brikkene har stoppet etter et slag.
 			// Striker ned = 1 brikke av spillers farge opp
 			// Queen ned = 1 brikke av spillers farge opp
+			
 		}
 		
 		public function update(e:TimerEvent=void):void{ // Oppdateringsfunksjon
@@ -199,7 +202,7 @@
 		}
 		
 		public function collectIfDead(piece:Piece):void { // Fjerner en gitt brikke fra spillet dersom den er over et hull.
-			var pieceOverlaps:Boolean = false;
+			var pieceOverlaps:Boolean = false; // Sjekker om en brikke overlapper tilstrekkelig med et hull
 			for each(var hole:MovieClip in holesArray) {
 				var holeR:Number = hole.width/2;
 				var dx:Number = hole.x - piece.x;
@@ -209,12 +212,21 @@
 					pieceOverlaps = true;
 				}
 			}
-			if (pieceOverlaps) {
+			if (pieceOverlaps) { 
+				// Nullstiller brikkens fart
 				piece.vX = 0;
 				piece.vY = 0;
-				gameBoard.removeChild(piece);
-				piecesArray.splice(piecesArray.indexOf(piece), 1);
-				currentDeadPiecesArray.push(piece);
+				
+				gameBoard.removeChild(piece); // Fjerner brikken visuelt fra brettet
+				piecesArray.splice(piecesArray.indexOf(piece), 1); // Fjerner brikken fra oppdateringsarrayen
+				currentDeadPiecesArray.push(piece); // Legger brikken til i arrayen for midlertidige utslåtte brikker
+				if (!players && piece.Type != "Queen" && piece.Type != "Striker") { // Dersom ikke farger er bestemt, bestemmes disse når første brikke blir slått ned (som ikke er striker eller queen)
+					if ((piece.Type == "WhiteMan" && currentPlayer == 0) || (piece.Type == "BlackMan" && currentPlayer == 1)){
+						players = ["WhiteMan", "BlackMan"];
+					}else {
+						players = ["BlackMan", "WhiteMan"];
+					}
+				}
 			}
 		}
 		
