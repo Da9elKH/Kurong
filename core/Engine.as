@@ -18,7 +18,7 @@ package core {
 		private var gameTimer:Timer = new Timer(0, 0); // Spilltimeren (kjører oppdateringsfunksjonen)
 		private var rotateTimer:Timer = new Timer(0, 180); // Rotasjonstimer (kjører når brettet roteres 180 grader)
 		
-		private var currentPlayer:int; // 0=spiller1 && 1=spiller2 //
+		public var currentPlayer:int; // 0=spiller1 && 1=spiller2 //
 		//private var currentStrike:int; // Slag nr. (begynner å telle på 0)
 		private var currentRound:int; // Lagrer foreløpig runde i en eventuell turnering.
 		private var friction:Number = 0.01; // Friksjonskonstant mellom brett og brikke
