@@ -28,8 +28,8 @@ package core {
 		private var currentDeadPiecesArray:Array = new Array; // Lagrer brikker som har blitt slått ned i dette slaget.
 		private var holesArray:Array = new Array(); // Lagrer hullene på brettet
 		public var scores:Array = [0, 0]; // Lagrer poengene til hver spiller
-		public var scoreText1:TextField; // Tekstboksen til spiller1 sin poengsum
-		public var scoreText2:TextField; // Tekstboksen til spiller2 sin poengsum
+		private var ScoreText1:TextField; // Tekstboksen til spiller1 sin poengsum
+		private var ScoreText2:TextField; // Tekstboksen til spiller2 sin poengsum
 		private var players:Array = new Array(); // Kopler spiller og brikker sammen.
 		private var numGames:int = 1; // Antall spill som skal spilles.
 		
@@ -37,6 +37,15 @@ package core {
 		private var gameBoard:MovieClip; // Lagrer brettet
 		public var striker:Striker; //} Lagrer Striker
 		
+		public function set scoreText1(newValue:TextField):void {
+			ScoreText1 = newValue;
+			ScoreText1.text = String(scores[0]) + " p";
+		}
+		
+		public function set scoreText2(newValue:TextField):void {
+			ScoreText2 = newValue;
+			ScoreText2.text = String(scores[1]) + " p";
+		}
 		
 		public function Engine(board:MovieClip, gameCount:int):void { // Contructor-funksjon for Engine-klassen.
 			gameTimer.addEventListener(TimerEvent.TIMER, update);
