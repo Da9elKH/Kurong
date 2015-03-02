@@ -74,6 +74,7 @@ package core {
 			deadPiecesArray = new Array();
 			scoreBoard.currentPlayerStriker.y = -103.8; // Resetter posisjonen til strikeren som viser spillers tur
 			strikerIsHit = false;
+			updateScores();
 			
 			scoreBoard.objPlayerWhite.visible = false;
 			scoreBoard.objPlayerBlack.visible = false;
@@ -181,7 +182,9 @@ package core {
 					}else {
 						deadPiecesArray.push(p);
 					}
-				} currentDeadPiecesArray = new Array();
+				} 
+				currentDeadPiecesArray = new Array();
+				updateScores();
 				
 				if(players.length){
 					for (var i:int = 0; i < punishment; i++ ) { // Utfører straffen ved å plassere brikker tilbake på brettet dersom tilstrekkelig er slått ned
@@ -401,7 +404,7 @@ package core {
 		}
 		
 		public function getPieceCount(type:String, array:Array):int {
-			var count:int;
+			var count:int = 0;
 			for each(var p:Piece in array) {
 				if (p.Type == type) count++;
 			}
@@ -412,8 +415,10 @@ package core {
 			scoreBoard.lblPlayerScore1.text = String(scores[0]) + " p";
 			scoreBoard.lblPlayerScore2.text = String(scores[1]) + " p";
 			if(players){
-				scoreBoard.lblPlayerPoints1.text = String(getPieceCount(players[0], deadPiecesArray) + getPieceCount(players[0], currentDeadPiecesArray));
-				scoreBoard.lblPlayerPoints2.text = String(getPieceCount(players[1], deadPiecesArray) + getPieceCount(players[1], currentDeadPiecesArray));
+				scoreBoard.lblPlayerPoints1.text = "x" + String(getPieceCount(players[0], deadPiecesArray) + getPieceCount(players[0], currentDeadPiecesArray));
+				scoreBoard.lblPlayerPoints2.text = "x" + String(getPieceCount(players[1], deadPiecesArray) + getPieceCount(players[1], currentDeadPiecesArray));
+				trace("DeadPiecesArray =", deadPiecesArray);
+				trace("CurrentDeadPiecesArray =", currentDeadPiecesArray);
 			}
 		}
 	}
