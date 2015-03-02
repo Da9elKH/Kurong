@@ -68,6 +68,9 @@ package core {
 		public function Engine(board:MovieClip, gameScore:MovieClip, gameCount:int):void { // Contructor-funksjon for Engine-klassen.
 			gameTimer.addEventListener(TimerEvent.TIMER, update);
 			rotateTimer.addEventListener(TimerEvent.TIMER, rotateTick);
+			scoreBoard = gameScore;
+			ScoreText1 = scoreBoard.lblPlayerScore1;
+			ScoreText2 = scoreBoard.lblPlayerScore2;
 			holesArray.push(board.h1);
 			holesArray.push(board.h2);
 			holesArray.push(board.h3);
@@ -78,16 +81,13 @@ package core {
 		}
 		
 		public function newGame():void { // Resetter brettet til en ny start.
-			scoreBoard = gameScore;
-			ScoreText1 = scoreBoard.lblPlayerScore1;
-			ScoreText2 = scoreBoard.lblPlayerScore2;
 			currentPlayer = 0;
 			gameBoard.rotation = 0;
 			gameTimer.start();
 			clearChildren(); // Fjerner alle brikkene som har blitt slått ned fra forrige runde
 			piecesArray = new Array();
 			deadPiecesArray = new Array();
-			
+			scoreBoard.currentPlayerStriker.y = -103.8; // Resetter posisjonen til strikeren som viser spillers tur
 			
 			
 		//////////////////// PLASSERING AV BRIKKER ///////////////////
@@ -98,7 +98,7 @@ package core {
 		// Queen-plassering
 			piecesArray.push(new Queen(0,0));
 		// WhiteMan-plasseringer:
-			/*piecesArray.push(new WhiteMan(+0*radius, +2*Math.sqrt(3)*radius ));
+			piecesArray.push(new WhiteMan(+0*radius, +2*Math.sqrt(3)*radius ));
 			piecesArray.push(new WhiteMan(+0*radius, -2*Math.sqrt(3)*radius ));
 			piecesArray.push(new WhiteMan(-3*radius, +1*Math.sqrt(3)*radius ));
 			piecesArray.push(new WhiteMan(-3*radius, -1*Math.sqrt(3)*radius ));
@@ -116,9 +116,8 @@ package core {
 			piecesArray.push(new BlackMan(+2*radius, +0*Math.sqrt(3)*radius ));
 			piecesArray.push(new BlackMan(+2*radius, +2*Math.sqrt(3)*radius ));
 			piecesArray.push(new BlackMan(+2*radius, -2*Math.sqrt(3)*radius ));
-			piecesArray.push(new BlackMan(+4*radius, +0*Math.sqrt(3)*radius ));*/
+			piecesArray.push(new BlackMan(+4*radius, +0*Math.sqrt(3)*radius ));
 		//////////////////////////////////////////////////////////////
-			piecesArray.push(new BlackMan(330, 330));
 			for each(var piece:Piece in piecesArray) {
 				gameBoard.addChild(piece);
 			}
@@ -144,7 +143,7 @@ package core {
 					scores[currentPlayer]++; // Spilleren får poeng for vunnet runde
 					Scores = scores; // Sørger for at poengsummene blir oppdatert ved å bruke set-funksjonen for score.
 					roundWon = true; // Hopper over resten av koden som ville kjørt dersom spillet ikke var vunnet
-					if(scores[0] + scores[1] < numGames){ // Dersom summen av poengsummene er lavere enn antall spill/runder som skal spilles, starter neste spill/runde
+					if(scores[0] < (numGames+1)/2 && scores[1] < (numGames+1)/2){ // Dersom summen av poengsummene er lavere enn antall spill/runder som skal spilles, starter neste spill/runde
 						newGame();
 					}else { // Alle runder er ferdig, og en melding popper opp som sier hvem som vant.
 						gameTimer.stop();
@@ -173,16 +172,17 @@ package core {
 				}
 				///////
 				for each(var p:Piece in currentDeadPiecesArray) {
-					if (p.Type == "Queen") {
+					if (p.Type == "Queen") { // Dersom en dronning er slått ned før alle andre egne brikker
+						// Plasserer brikken et sted i sentrum av brettet.
 						p.x = 10*(Math.random()-0.5);
 						p.y = 10*(Math.random()-0.5);
 						gameBoard.addChild(p);
 						piecesArray.push(p);
-						punishment++;
+						punishment++; // Legger til på straffekvoten
 						nextPlayer = true;
-					}else if (p.Type == "Striker") {
+					}else if (p.Type == "Striker") { // Dersom strikeren har blitt slått ned, plasseres den tilbake på brettet.
 						p.x = 0;
-						p.y = 245.2;
+						p.y = (currentPlayer == 0) ? 245.2: -245.2; // Plasserer den i midten av feltet fra hvor den skal skytes i neste slag.
 						gameBoard.addChild(p);
 						piecesArray.push(p);
 						punishment++;
@@ -193,7 +193,7 @@ package core {
 				} currentDeadPiecesArray = new Array();
 				
 				if(players.length){
-					for (var i:int = 0; i < punishment; i++ ) {
+					for (var i:int = 0; i < punishment; i++ ) { // Utfører straffen ved å plassere brikker tilbake på brettet dersom tilstrekkelig er slått ned
 						var piece:Piece = getPiece(players[currentPlayer],deadPiecesArray);
 						if (piece) {
 							piece.x = 10*(Math.random()-0.5);
@@ -204,7 +204,7 @@ package core {
 					}
 				}
 				
-				if (nextPlayer) {
+				if (nextPlayer) { // Roterer brettet og flytter spillermarkøren (striker-bildet)
 					rotateTimer.reset();
 					rotateTimer.start();
 					currentPlayer = otherPlayer;
@@ -309,11 +309,8 @@ package core {
 				var vN1:Number = (vX1 * dY - vY1 * dX) / d;
 				var vN2:Number = (vX2 * dY - vY2 * dX) / d;
 				
-				var soundAmplitude:Number = Math.abs(vP1 - vP2);
-				
 				if (vX1*vX1 + vY1*vY1 != 0 || vX2*vX2 + vY2*vY2 != 0) {
-					//Spiller av lyden av kollisjon med brikke;
-					//pieceCollisionSound.
+					//Spiller av lyden av kollisjon med brikke (gitt at farten til begge brikkene ikke er 0);
 					pieceCollisionSound.play(0);
 				}
 				
