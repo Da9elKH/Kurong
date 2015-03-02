@@ -1,4 +1,4 @@
-﻿package core {
+package core {
 	//{ IMPORTS
 	import core.Piece;
 	import core.pieces.WhiteMan;
@@ -50,7 +50,6 @@
 			scores = newValue;
 			updateScores();
 		}
-
 		
 		public function Engine(board:MovieClip, ScoreBoard:MovieClip, gameCount:int):void { // Contructor-funksjon for Engine-klassen.
 			gameTimer.addEventListener(TimerEvent.TIMER, update);
@@ -194,8 +193,9 @@
 							piece.y = 10*(Math.random()-0.5);
 							gameBoard.addChild(piece);
 							piecesArray.push(piece);
+							deadPiecesArray.splice(deadPiecesArray.indexOf(piece), 1);
 						}
-					}
+					} updateScores();
 				}
 				
 				if (nextPlayer) { // Roterer brettet og flytter spillermarkøren (striker-bildet)
@@ -347,7 +347,7 @@
 				piece.vY = 0;
 				
 				currentDeadPiecesArray.push(piece); // Legger brikken til i arrayen for midlertidige utslåtte brikker
-				trace("childIndex = " + gameBoard.getChildIndex(piece));
+				
 				gameBoard.removeChild(piece); // Fjerner brikken visuelt fra brettet
 				piecesArray.splice(piecesArray.indexOf(piece), 1); // Fjerner brikken fra oppdateringsarrayen
 				updateScores();
