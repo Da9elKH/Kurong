@@ -1,4 +1,4 @@
-package core {
+﻿package core {
 	//{ IMPORTS
 	import core.Piece;
 	import core.pieces.WhiteMan;
@@ -85,7 +85,6 @@ package core {
 		const radius:Number = 15.5;
 		// Striker-plassering
 			piecesArray.push(new Striker(0, 245.2));
-			striker = piecesArray[0];
 		// Queen-plassering
 			piecesArray.push(new Queen(0,0));
 		// WhiteMan-plasseringer:
@@ -109,6 +108,7 @@ package core {
 			piecesArray.push(new BlackMan(+2*radius, -2*Math.sqrt(3)*radius ));
 			piecesArray.push(new BlackMan(+4*radius, +0*Math.sqrt(3)*radius ));
 		//////////////////////////////////////////////////////////////
+			striker = Striker(getPiece("Striker", piecesArray));
 			for each(var piece:Piece in piecesArray) {
 				gameBoard.addChild(piece);
 			}
@@ -337,6 +337,7 @@ package core {
 					pieceOverlaps = true;
 				}
 			}
+			
 			if (pieceOverlaps) { 
 				//Spiller av lyd
 				holeSound.play(0);
@@ -346,6 +347,7 @@ package core {
 				piece.vY = 0;
 				
 				currentDeadPiecesArray.push(piece); // Legger brikken til i arrayen for midlertidige utslåtte brikker
+				trace("childIndex = " + gameBoard.getChildIndex(piece));
 				gameBoard.removeChild(piece); // Fjerner brikken visuelt fra brettet
 				piecesArray.splice(piecesArray.indexOf(piece), 1); // Fjerner brikken fra oppdateringsarrayen
 				updateScores();
@@ -417,8 +419,6 @@ package core {
 			if(players){
 				scoreBoard.lblPlayerPoints1.text = "x" + String(getPieceCount(players[0], deadPiecesArray) + getPieceCount(players[0], currentDeadPiecesArray));
 				scoreBoard.lblPlayerPoints2.text = "x" + String(getPieceCount(players[1], deadPiecesArray) + getPieceCount(players[1], currentDeadPiecesArray));
-				trace("DeadPiecesArray =", deadPiecesArray);
-				trace("CurrentDeadPiecesArray =", currentDeadPiecesArray);
 			}
 		}
 	}
