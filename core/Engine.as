@@ -1,4 +1,4 @@
-package core {
+﻿package core {
 	//{ IMPORTS
 	import core.Piece;
 	import core.pieces.WhiteMan;
@@ -10,6 +10,7 @@ package core {
 	import flash.events.TimerEvent;
 	import flash.text.TextField;
 	import flash.utils.Timer;
+	import flash.media.Sound;
 	//}
 	
 	public class Engine {
@@ -18,6 +19,10 @@ package core {
 		
 		var whiteColor:int = 0xFFE49F;
 		var blackColor:int = 0x4B2F1F;
+		
+		public var wallCollisionSound:Sound;
+		public var pieceCollisionSound:Sound;
+		public var holeSound:Sound;
 		
 		private var gameTimer:Timer = new Timer(0, 0); // Spilltimeren (kjører oppdateringsfunksjonen)
 		private var rotateTimer:Timer = new Timer(0, 180); // Rotasjonstimer (kjører når brettet roteres 180 grader)
@@ -238,18 +243,28 @@ package core {
 		}
 		
 		public function wallCollider(piece:Piece):void { // Utfører veggkollisjoner for en brikke
+			var sPlay:Boolean = false;
+			
 			if (piece.x >= 370 - piece.Radius) { // Høyre vegg
 				piece.vX = - Math.abs(piece.vX);
 				piece.x = 370 - piece.Radius;
+				sPlay = true;
 			} if (piece.x <= -370 + piece.Radius) { // Venstre vegg
 				piece.vX = Math.abs(piece.vX);
 				piece.x = -370 + piece.Radius;
+				sPlay = true;
 			} if (piece.y <= -370 + piece.Radius) { // Øverste vegg
 				piece.vY = Math.abs(piece.vY);
 				piece.y = -370 + piece.Radius;
+				sPlay = true;
 			} if (piece.y >= 370 - piece.Radius) { // Nederste vegg
 				piece.vY = - Math.abs(piece.vY);
 				piece.y = 370 - piece.Radius;
+				sPlay = true;
+			}
+			
+			if (sPlay) {
+				wallCollisionSound.play(0);
 			}
 		}
 		
@@ -260,6 +275,11 @@ package core {
 			var sumR:Number = piece1.Radius + piece2.Radius; // Sum av radier, altså det nærmeste to brikker kan komme hverandre.
 			
 			if(d <= sumR){ // Sjekker om brikkene er i kontakt med hverandre. Dersom de er dette, utføres støtet.
+				if ((piece1.vX + piece1.vY) != 0 || (piece2.vX + piece2.vY) != 0) {
+					//Spiller av lyden av kollisjon med brikke;
+					pieceCollisionSound.play(0);
+				}
+				
 				// Lagring av masser i egne variabler for å gjøre formlene kortere, og enklere å forstå.
 				var m1:Number = piece1.Mass;
 				var m2:Number = piece2.Mass;
@@ -308,6 +328,9 @@ package core {
 				}
 			}
 			if (pieceOverlaps) { 
+				//Spiller av lyd
+				holeSound.play(0);
+				
 				// Nullstiller brikkens fart
 				piece.vX = 0;
 				piece.vY = 0;
