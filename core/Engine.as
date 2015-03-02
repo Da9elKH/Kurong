@@ -88,7 +88,7 @@ package core {
 			piecesArray = new Array();
 			deadPiecesArray = new Array();
 			scoreBoard.currentPlayerStriker.y = -103.8; // Resetter posisjonen til strikeren som viser spillers tur
-			
+			strikerIsHit = false;
 			
 		//////////////////// PLASSERING AV BRIKKER ///////////////////
 		const radius:Number = 15.5;
