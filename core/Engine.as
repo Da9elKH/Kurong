@@ -1,4 +1,4 @@
-﻿package core {
+package core {
 	//{ IMPORTS
 	import core.Piece;
 	import core.pieces.WhiteMan;
@@ -41,6 +41,7 @@
 		private var ScoreText2:TextField; // Tekstboksen til spiller2 sin poengsum
 		private var players:Array = new Array(); // Kopler spiller og brikker sammen.
 		private var numGames:int = 1; // Antall spill som skal spilles.
+		public var winMessage:MovieClip; // Overlayen som kommer opp når en spiller vinner.
 		
 		public var strikerIsHit:Boolean; // Lagrer hvorvidt runden har blitt startet ved å skyte striker.
 		private var gameBoard:MovieClip; // Lagrer brettet
@@ -138,10 +139,10 @@
 						gameTimer.stop();
 						strikerIsHit = true;
 						if (scores[0] > scores[1]) {
-							trace("Spiller 1 vinner!");
+							winMessage.lblMessage.text = "Spiller 1 har vunnet!";
 						}else {
-							trace("Spiller 2 vinner!");
-						}
+							winMessage.lblMessage.text = "Spiller 2 har vunnet!";
+						}winMessage.visible = true;
 					}
 				}
 			}
@@ -275,11 +276,7 @@
 			var sumR:Number = piece1.Radius + piece2.Radius; // Sum av radier, altså det nærmeste to brikker kan komme hverandre.
 			
 			if(d <= sumR){ // Sjekker om brikkene er i kontakt med hverandre. Dersom de er dette, utføres støtet.
-				if ((piece1.vX + piece1.vY) != 0 || (piece2.vX + piece2.vY) != 0) {
-					//Spiller av lyden av kollisjon med brikke;
-					pieceCollisionSound.play(0);
-				}
-				
+
 				// Lagring av masser i egne variabler for å gjøre formlene kortere, og enklere å forstå.
 				var m1:Number = piece1.Mass;
 				var m2:Number = piece2.Mass;
@@ -297,6 +294,12 @@
 				var vN2:Number = (vX2 * dY - vY2 * dX) / d;
 				
 				var soundAmplitude:Number = Math.abs(vP1 - vP2);
+				
+				if (vX1*vX1 + vY1*vY1 != 0 || vX2*vX2 + vY2*vY2 != 0) {
+					//Spiller av lyden av kollisjon med brikke;
+					//pieceCollisionSound.
+					pieceCollisionSound.play(0);
+				}
 				
 				// Utfører det elastiske støtet mellom de to brikkene.
 				var vP1_New:Number = (m1 * vP1 - m2 * vP1 + 2 * m2 * vP2) / (m1 + m2);
