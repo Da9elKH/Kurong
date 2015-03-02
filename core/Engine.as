@@ -6,6 +6,7 @@ package core {
 	import core.pieces.Queen;
 	import core.pieces.Striker;
 	import flash.display.MovieClip;
+	import flash.display.ShaderParameter;
 	import flash.events.TimerEvent;
 	import flash.text.TextField;
 	import flash.utils.Timer;
@@ -15,6 +16,9 @@ package core {
 		
 		//{	VARIABLER
 		
+		var whiteColor:int = 0xFFE49F;
+		var blackColor:int = 0x4B2F1F;
+		
 		private var gameTimer:Timer = new Timer(0, 0); // Spilltimeren (kjører oppdateringsfunksjonen)
 		private var rotateTimer:Timer = new Timer(0, 180); // Rotasjonstimer (kjører når brettet roteres 180 grader)
 		
@@ -23,7 +27,7 @@ package core {
 		private var currentRound:int; // Lagrer foreløpig runde i en eventuell turnering.
 		private var friction:Number = 0.01; // Friksjonskonstant mellom brett og brikke
 		
-		private var piecesArray:Array; // Lagrer alle brikker i spill
+		public var piecesArray:Array; // Lagrer alle brikker i spill
 		private var deadPiecesArray:Array; // Lagrer alle brikker som har blitt slått ut av spillet
 		private var currentDeadPiecesArray:Array = new Array; // Lagrer brikker som har blitt slått ned i dette slaget.
 		private var holesArray:Array = new Array(); // Lagrer hullene på brettet
@@ -68,6 +72,8 @@ package core {
 		
 		public function newGame():void { // Resetter brettet til en ny start.
 			players = new Array();
+			currentPlayer = 0;
+			gameBoard.rotation = 0;
 			gameTimer.start();
 			clearChildren(); // Fjerner alle brikkene som har blitt slått ned fra forrige runde
 			piecesArray = new Array();
@@ -101,6 +107,7 @@ package core {
 			piecesArray.push(new BlackMan(+2*radius, -2*Math.sqrt(3)*radius ));
 			piecesArray.push(new BlackMan(+4*radius, +0*Math.sqrt(3)*radius ));
 		//////////////////////////////////////////////////////////////
+			//piecesArray.push(new BlackMan(330, 330));
 			for each(var piece:Piece in piecesArray) {
 				gameBoard.addChild(piece);
 			}
@@ -114,12 +121,81 @@ package core {
 		}
 		
 		public function strikeFinished():void { // Kjører når alle brikkene har stoppet etter et slag.
-			// Striker ned = 1 brikke av spillers farge opp
-			// Queen ned = 1 brikke av spillers farge opp
-			//if(getPiece("Striker", currentDeadPiecesArray))
+			var roundWon:Boolean = false; // Sjekker om spillet er vunnet
+			if(players.length){
+				if (getPiece("Queen", currentDeadPiecesArray) && !getPiece(players[currentPlayer], piecesArray)) {
+					scores[currentPlayer]++;
+					Scores = scores;
+					roundWon = true;
+					if(scores[0] + scores[1] < numGames){
+						newGame();
+					}else {
+						gameTimer.stop();
+						strikerIsHit = true;
+						if (scores[0] > scores[1]) {
+							trace("Spiller 1 vinner!");
+						}else {
+							trace("Spiller 2 vinner!");
+						}
+					}
+				}
+			}
+			if (!roundWon) {
+				var punishment:int = 0;
+				var otherPlayer:int = int(!Boolean(currentPlayer));
+				var nextPlayer:Boolean = false;
+				//////////
+				if (!players.length) {
+					nextPlayer = true;
+				}else{
+					if (getPiece(players[otherPlayer], currentDeadPiecesArray)) {
+						nextPlayer = true;
+					} else if (!getPiece(players[currentPlayer], currentDeadPiecesArray)) {
+						nextPlayer = true;
+					}
+				}
+				///////
+				for each(var p:Piece in currentDeadPiecesArray) {
+					if (p.Type == "Queen") {
+						p.x = 10*(Math.random()-0.5);
+						p.y = 10*(Math.random()-0.5);
+						gameBoard.addChild(p);
+						piecesArray.push(p);
+						punishment++;
+						nextPlayer = true;
+					}else if (p.Type == "Striker") {
+						p.x = 0;
+						p.y = 245.2;
+						gameBoard.addChild(p);
+						piecesArray.push(p);
+						punishment++;
+						nextPlayer = true;
+					}else {
+						deadPiecesArray.push(p);
+					}
+				} currentDeadPiecesArray = new Array();
+				
+				if(players.length){
+					for (var i:int = 0; i < punishment; i++ ) {
+						var piece:Piece = getPiece(players[currentPlayer],deadPiecesArray);
+						if (piece) {
+							piece.x = 10*(Math.random()-0.5);
+							piece.y = 10*(Math.random()-0.5);
+							gameBoard.addChild(piece);
+							piecesArray.push(piece);
+						}
+					}
+				}
+				
+				if (nextPlayer) {
+					rotateTimer.reset();
+					rotateTimer.start();
+					currentPlayer = otherPlayer;
+				}
+			}
 		}
 		
-		public function update(e:TimerEvent=void):void{ // Oppdateringsfunksjon
+		public function update(e:TimerEvent = void):void { // Oppdateringsfunksjon
 			if (!piecesHaveStopped() && !strikerIsHit) { // Dersom brikker beveger seg og ikke slag er registrert, så registreres slag.
 				strikerIsHit = true;
 			}else if (piecesHaveStopped() && strikerIsHit) { // Dersom brikkene ikke beveger seg og et slag har blitt registrert
@@ -236,14 +312,19 @@ package core {
 				piece.vX = 0;
 				piece.vY = 0;
 				
+				currentDeadPiecesArray.push(piece); // Legger brikken til i arrayen for midlertidige utslåtte brikker
 				gameBoard.removeChild(piece); // Fjerner brikken visuelt fra brettet
 				piecesArray.splice(piecesArray.indexOf(piece), 1); // Fjerner brikken fra oppdateringsarrayen
-				currentDeadPiecesArray.push(piece); // Legger brikken til i arrayen for midlertidige utslåtte brikker
-				if (!players && piece.Type != "Queen" && piece.Type != "Striker") { // Dersom ikke farger er bestemt, bestemmes disse når første brikke blir slått ned (som ikke er striker eller queen)
+				
+				if (!players.length && piece.Type != "Queen" && piece.Type != "Striker") { // Dersom ikke farger er bestemt, bestemmes disse når første brikke blir slått ned (som ikke er striker eller queen)
 					if ((piece.Type == "WhiteMan" && currentPlayer == 0) || (piece.Type == "BlackMan" && currentPlayer == 1)){
 						players = ["WhiteMan", "BlackMan"];
+						ScoreText1.textColor = whiteColor;
+						ScoreText2.textColor = blackColor;
 					}else {
 						players = ["BlackMan", "WhiteMan"];
+						ScoreText1.textColor = blackColor;
+						ScoreText2.textColor = whiteColor;
 					}
 				}
 			}
