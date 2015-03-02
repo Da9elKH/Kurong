@@ -19,6 +19,7 @@ package core {
 		
 		var whiteColor:int = 0xFFE49F;
 		var blackColor:int = 0x4B2F1F;
+		var neutralColor:int = 0xFFFFFF;
 		
 		public var wallCollisionSound:Sound;
 		public var pieceCollisionSound:Sound;
@@ -77,13 +78,19 @@ package core {
 		}
 		
 		public function newGame():void { // Resetter brettet til en ny start.
-			players = new Array();
+			
 			currentPlayer = 0;
 			gameBoard.rotation = 0;
 			gameTimer.start();
 			clearChildren(); // Fjerner alle brikkene som har blitt slått ned fra forrige runde
 			piecesArray = new Array();
 			deadPiecesArray = new Array();
+			
+			players = new Array(); // Resetting av spillertilknytning til brikkefarge
+			if (ScoreText1 && ScoreText2) {	// Resetting av score-farger (den visuelle representasjonen av brikke-tilknytning)
+				ScoreText1.textColor = neutralColor;
+				ScoreText2.textColor = neutralColor;
+			}
 			
 		//////////////////// PLASSERING AV BRIKKER ///////////////////
 		const radius:Number = 15.5;
@@ -93,7 +100,7 @@ package core {
 		// Queen-plassering
 			piecesArray.push(new Queen(0,0));
 		// WhiteMan-plasseringer:
-			piecesArray.push(new WhiteMan(+0*radius, +2*Math.sqrt(3)*radius ));
+			/*piecesArray.push(new WhiteMan(+0*radius, +2*Math.sqrt(3)*radius ));
 			piecesArray.push(new WhiteMan(+0*radius, -2*Math.sqrt(3)*radius ));
 			piecesArray.push(new WhiteMan(-3*radius, +1*Math.sqrt(3)*radius ));
 			piecesArray.push(new WhiteMan(-3*radius, -1*Math.sqrt(3)*radius ));
@@ -111,9 +118,9 @@ package core {
 			piecesArray.push(new BlackMan(+2*radius, +0*Math.sqrt(3)*radius ));
 			piecesArray.push(new BlackMan(+2*radius, +2*Math.sqrt(3)*radius ));
 			piecesArray.push(new BlackMan(+2*radius, -2*Math.sqrt(3)*radius ));
-			piecesArray.push(new BlackMan(+4*radius, +0*Math.sqrt(3)*radius ));
+			piecesArray.push(new BlackMan(+4*radius, +0*Math.sqrt(3)*radius ));*/
 		//////////////////////////////////////////////////////////////
-			//piecesArray.push(new BlackMan(330, 330));
+			piecesArray.push(new BlackMan(330, 330));
 			for each(var piece:Piece in piecesArray) {
 				gameBoard.addChild(piece);
 			}
