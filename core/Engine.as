@@ -37,8 +37,6 @@ package core {
 		private var currentDeadPiecesArray:Array = new Array; // Lagrer brikker som har blitt slått ned i dette slaget.
 		private var holesArray:Array = new Array(); // Lagrer hullene på brettet
 		public var scores:Array = [0, 0]; // Lagrer poengene til hver spiller
-		private var ScoreText1:TextField; // Tekstboksen til spiller1 sin poengsum
-		private var ScoreText2:TextField; // Tekstboksen til spiller2 sin poengsum
 		private var scoreBoard:MovieClip; // 
 		private var players:Array = new Array(); // Kopler spiller og brikker sammen.
 		private var numGames:int = 1; // Antall spill som skal spilles.
@@ -48,34 +46,21 @@ package core {
 		private var gameBoard:MovieClip; // Lagrer brettet
 		public var striker:Striker; //} Lagrer Striker
 		
-		public function set scoreText1(newValue:TextField):void {
-			ScoreText1 = newValue;
-			ScoreText1.text = String(scores[0]) + " p";
-		}
-		
-		public function set scoreText2(newValue:TextField):void {
-			ScoreText2 = newValue;
-			ScoreText2.text = String(scores[1]) + " p";
-		}
-		
 		public function set Scores(newValue:Array):void {
 			scores = newValue;
-			ScoreText1.text = ScoreText1.text = String(scores[0]) + " p";
-			ScoreText2.text = ScoreText2.text = String(scores[1]) + " p";
+			updateScores();
 		}
 
 		
-		public function Engine(board:MovieClip, gameScore:MovieClip, gameCount:int):void { // Contructor-funksjon for Engine-klassen.
+		public function Engine(board:MovieClip, ScoreBoard:MovieClip, gameCount:int):void { // Contructor-funksjon for Engine-klassen.
 			gameTimer.addEventListener(TimerEvent.TIMER, update);
 			rotateTimer.addEventListener(TimerEvent.TIMER, rotateTick);
-			scoreBoard = gameScore;
-			ScoreText1 = scoreBoard.lblPlayerScore1;
-			ScoreText2 = scoreBoard.lblPlayerScore2;
+			scoreBoard = ScoreBoard;
+			gameBoard = board;
 			holesArray.push(board.h1);
 			holesArray.push(board.h2);
 			holesArray.push(board.h3);
 			holesArray.push(board.h4);
-			gameBoard = board;
 			numGames = gameCount;
 			newGame();
 		}
@@ -89,6 +74,11 @@ package core {
 			deadPiecesArray = new Array();
 			scoreBoard.currentPlayerStriker.y = -103.8; // Resetter posisjonen til strikeren som viser spillers tur
 			strikerIsHit = false;
+			
+			scoreBoard.objPlayerWhite.visible = false;
+			scoreBoard.objPlayerBlack.visible = false;
+			scoreBoard.lblPlayerPoints1.visible = false;
+			scoreBoard.lblPlayerPoints2.visible = false;
 			
 		//////////////////// PLASSERING AV BRIKKER ///////////////////
 		const radius:Number = 15.5;
@@ -128,10 +118,11 @@ package core {
 			for each(var piece in piecesArray) {
 				gameBoard.removeChild(piece);
 			}
-			if (ScoreText1 && ScoreText2) {	// Resetting av score-farger (den visuelle representasjonen av brikke-tilknytning)
-				ScoreText1.textColor = neutralColor;
-				ScoreText2.textColor = neutralColor;
-			}
+			// Resetting av score-farger (den visuelle representasjonen av brikke-tilknytning)
+			scoreBoard.lblPlayerScore1.textColor = neutralColor;
+			scoreBoard.lblPlayerPoints1.textColor = neutralColor;
+			scoreBoard.lblPlayerScore2.textColor = neutralColor;
+			scoreBoard.lblPlayerPoints2.textColor = neutralColor;
 		}
 		
 		public function strikeFinished():void { // Kjører når alle brikkene har stoppet etter et slag.
@@ -354,17 +345,32 @@ package core {
 				currentDeadPiecesArray.push(piece); // Legger brikken til i arrayen for midlertidige utslåtte brikker
 				gameBoard.removeChild(piece); // Fjerner brikken visuelt fra brettet
 				piecesArray.splice(piecesArray.indexOf(piece), 1); // Fjerner brikken fra oppdateringsarrayen
+				updateScores();
 				
 				if (!players.length && piece.Type != "Queen" && piece.Type != "Striker") { // Dersom ikke farger er bestemt, bestemmes disse når første brikke blir slått ned (som ikke er striker eller queen)
+					scoreBoard.objPlayerWhite.visible = true;
+					scoreBoard.objPlayerBlack.visible = true;
+					scoreBoard.lblPlayerPoints1.visible = true;
+					scoreBoard.lblPlayerPoints2.visible = true;
+					
 					if ((piece.Type == "WhiteMan" && currentPlayer == 0) || (piece.Type == "BlackMan" && currentPlayer == 1)){
 						players = ["WhiteMan", "BlackMan"];
-						ScoreText1.textColor = whiteColor;
-						ScoreText2.textColor = blackColor;
+						scoreBoard.lblPlayerScore1.textColor = whiteColor;
+						scoreBoard.lblPlayerScore2.textColor = blackColor;
+						scoreBoard.lblPlayerPoints1.textColor = whiteColor;
+						scoreBoard.lblPlayerPoints2.textColor = blackColor;
+						scoreBoard.objPlayerWhite.y = -52;
+						scoreBoard.objPlayerBlack.y = 99;
 					}else {
 						players = ["BlackMan", "WhiteMan"];
-						ScoreText1.textColor = blackColor;
-						ScoreText2.textColor = whiteColor;
+						scoreBoard.lblPlayerScore1.textColor = blackColor;
+						scoreBoard.lblPlayerScore2.textColor = whiteColor;
+						scoreBoard.lblPlayerPoints1.textColor = blackColor;
+						scoreBoard.lblPlayerPoints2.textColor = whiteColor;
+						scoreBoard.objPlayerWhite.y = 99;
+						scoreBoard.objPlayerBlack.y = -52;
 					}
+					updateScores();
 				}
 			}
 		}
@@ -394,6 +400,21 @@ package core {
 			return piece;
 		}
 		
+		public function getPieceCount(type:String, array:Array):int {
+			var count:int;
+			for each(var p:Piece in array) {
+				if (p.Type == type) count++;
+			}
+			return count;
+		}
 		
+		public function updateScores():void {
+			scoreBoard.lblPlayerScore1.text = String(scores[0]) + " p";
+			scoreBoard.lblPlayerScore2.text = String(scores[1]) + " p";
+			if(players){
+				scoreBoard.lblPlayerPoints1.text = String(getPieceCount(players[0], deadPiecesArray) + getPieceCount(players[0], currentDeadPiecesArray));
+				scoreBoard.lblPlayerPoints2.text = String(getPieceCount(players[1], deadPiecesArray) + getPieceCount(players[1], currentDeadPiecesArray));
+			}
+		}
 	}
 }
