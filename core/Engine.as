@@ -29,7 +29,6 @@ package core {
 		private var rotateTimer:Timer = new Timer(0, 180); // Rotasjonstimer (kjører når brettet roteres 180 grader)
 		
 		public var currentPlayer:int; // 0=spiller1 && 1=spiller2 //
-		//private var currentStrike:int; // Slag nr. (begynner å telle på 0)
 		private var currentRound:int; // Lagrer foreløpig runde i en eventuell turnering.
 		private var friction:Number = 0.01; // Friksjonskonstant mellom brett og brikke
 		
@@ -40,6 +39,7 @@ package core {
 		public var scores:Array = [0, 0]; // Lagrer poengene til hver spiller
 		private var ScoreText1:TextField; // Tekstboksen til spiller1 sin poengsum
 		private var ScoreText2:TextField; // Tekstboksen til spiller2 sin poengsum
+		private var scoreBoard:MovieClip; // 
 		private var players:Array = new Array(); // Kopler spiller og brikker sammen.
 		private var numGames:int = 1; // Antall spill som skal spilles.
 		public var winMessage:MovieClip; // Overlayen som kommer opp når en spiller vinner.
@@ -65,7 +65,7 @@ package core {
 		}
 
 		
-		public function Engine(board:MovieClip, gameCount:int):void { // Contructor-funksjon for Engine-klassen.
+		public function Engine(board:MovieClip, gameScore:MovieClip, gameCount:int):void { // Contructor-funksjon for Engine-klassen.
 			gameTimer.addEventListener(TimerEvent.TIMER, update);
 			rotateTimer.addEventListener(TimerEvent.TIMER, rotateTick);
 			holesArray.push(board.h1);
@@ -78,7 +78,9 @@ package core {
 		}
 		
 		public function newGame():void { // Resetter brettet til en ny start.
-			
+			scoreBoard = gameScore;
+			ScoreText1 = scoreBoard.lblPlayerScore1;
+			ScoreText2 = scoreBoard.lblPlayerScore2;
 			currentPlayer = 0;
 			gameBoard.rotation = 0;
 			gameTimer.start();
@@ -86,11 +88,7 @@ package core {
 			piecesArray = new Array();
 			deadPiecesArray = new Array();
 			
-			players = new Array(); // Resetting av spillertilknytning til brikkefarge
-			if (ScoreText1 && ScoreText2) {	// Resetting av score-farger (den visuelle representasjonen av brikke-tilknytning)
-				ScoreText1.textColor = neutralColor;
-				ScoreText2.textColor = neutralColor;
-			}
+			
 			
 		//////////////////// PLASSERING AV BRIKKER ///////////////////
 		const radius:Number = 15.5;
@@ -131,18 +129,24 @@ package core {
 			for each(var piece in piecesArray) {
 				gameBoard.removeChild(piece);
 			}
+			if (ScoreText1 && ScoreText2) {	// Resetting av score-farger (den visuelle representasjonen av brikke-tilknytning)
+				ScoreText1.textColor = neutralColor;
+				ScoreText2.textColor = neutralColor;
+			}
 		}
 		
 		public function strikeFinished():void { // Kjører når alle brikkene har stoppet etter et slag.
 			var roundWon:Boolean = false; // Sjekker om spillet er vunnet
 			if(players.length){
-				if (getPiece("Queen", currentDeadPiecesArray) && !getPiece(players[currentPlayer], piecesArray)) {
-					scores[currentPlayer]++;
-					Scores = scores;
-					roundWon = true;
-					if(scores[0] + scores[1] < numGames){
+				if (getPiece("Queen", currentDeadPiecesArray) && !getPiece(players[currentPlayer], piecesArray)) { 
+					// Dersom dronningen blir slått ned og spilleren ikke lenger 
+					// har brikker på brettet vil denne spilleren vinne runden.
+					scores[currentPlayer]++; // Spilleren får poeng for vunnet runde
+					Scores = scores; // Sørger for at poengsummene blir oppdatert ved å bruke set-funksjonen for score.
+					roundWon = true; // Hopper over resten av koden som ville kjørt dersom spillet ikke var vunnet
+					if(scores[0] + scores[1] < numGames){ // Dersom summen av poengsummene er lavere enn antall spill/runder som skal spilles, starter neste spill/runde
 						newGame();
-					}else {
+					}else { // Alle runder er ferdig, og en melding popper opp som sier hvem som vant.
 						gameTimer.stop();
 						strikerIsHit = true;
 						if (scores[0] > scores[1]) {
@@ -153,12 +157,12 @@ package core {
 					}
 				}
 			}
-			if (!roundWon) {
-				var punishment:int = 0;
-				var otherPlayer:int = int(!Boolean(currentPlayer));
-				var nextPlayer:Boolean = false;
+			if (!roundWon) { // Skjer dersom runden ikke er vunnet
+				var punishment:int = 0; // Holder styr på hvor mange brikker som skal tilbake på brettet
+				var otherPlayer:int = int(!Boolean(currentPlayer)); // Tallverdien for den andre spilleren
+				var nextPlayer:Boolean = false; // Lagrer hvorvidt turen skal gå videre til neste spiller, eller om spilleren får et nytt slag.
 				//////////
-				if (!players.length) {
+				if (!players.length) { // Dersom brikkenes farger er tilknyttet til spillerne
 					nextPlayer = true;
 				}else{
 					if (getPiece(players[otherPlayer], currentDeadPiecesArray)) {
@@ -204,6 +208,11 @@ package core {
 					rotateTimer.reset();
 					rotateTimer.start();
 					currentPlayer = otherPlayer;
+					if(otherPlayer == 0){
+						scoreBoard.currentPlayerStriker.y = -103.8;
+					}else {
+						scoreBoard.currentPlayerStriker.y = 48.8;
+					}
 				}
 			}
 		}
