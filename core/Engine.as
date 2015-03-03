@@ -69,8 +69,10 @@ package core {
 			gameBoard.rotation = 0;
 			gameTimer.start();
 			clearChildren(); // Fjerner alle brikkene som har blitt slått ned fra forrige runde
+			players = new Array();
 			piecesArray = new Array();
 			deadPiecesArray = new Array();
+			currentDeadPiecesArray = new Array();
 			scoreBoard.currentPlayerStriker.y = -103.8; // Resetter posisjonen til strikeren som viser spillers tur
 			strikerIsHit = false;
 			updateScores();
@@ -357,6 +359,7 @@ package core {
 					scoreBoard.objPlayerBlack.visible = true;
 					scoreBoard.lblPlayerPoints1.visible = true;
 					scoreBoard.lblPlayerPoints2.visible = true;
+					trace(scoreBoard, scoreBoard.objPlayerWhite.visible, scoreBoard.objPlayerBlack.visible, scoreBoard.lblPlayerPoints1.visible, scoreBoard.lblPlayerPoints2.visible);
 					
 					if ((piece.Type == "WhiteMan" && currentPlayer == 0) || (piece.Type == "BlackMan" && currentPlayer == 1)){
 						players = ["WhiteMan", "BlackMan"];
